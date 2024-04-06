@@ -1,0 +1,170 @@
+Q1]
+
+#include <stdio.h>
+
+#define MAX_PROCESSES 5
+#define MAX_RESOURCES 3
+
+int allocation[MAX_PROCESSES][MAX_RESOURCES];
+int max[MAX_PROCESSES][MAX_RESOURCES];
+int need[MAX_PROCESSES][MAX_RESOURCES];
+int available[MAX_RESOURCES];
+
+void acceptAvailable() {
+    printf("Enter the available resources:\n");
+    for (int i = 0; i < MAX_RESOURCES; i++) {
+        printf("Resource %d: ", i + 1);
+        scanf("%d", &available[i]);
+    }
+}
+
+void displayAllocationMax() {
+    printf("Process Allocation Max\n");
+    for (int i = 0; i < MAX_PROCESSES; i++) {
+        printf("P%d\t", i);
+        for (int j = 0; j < MAX_RESOURCES; j++) {
+            printf("%d ", allocation[i][j]);
+        }
+        printf("\t");
+        for (int j = 0; j < MAX_RESOURCES; j++) {
+            printf("%d ", max[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+void displayNeedMatrix() {
+    printf("Need Matrix\n");
+    for (int i = 0; i < MAX_PROCESSES; i++) {
+        printf("P%d\t", i);
+        for (int j = 0; j < MAX_RESOURCES; j++) {
+            printf("%d ", need[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+void displayAvailable() {
+    printf("Available Resources: ");
+    for (int i = 0; i < MAX_RESOURCES; i++) {
+        printf("%d ", available[i]);
+    }
+    printf("\n");
+}
+
+int main() {
+    // Initialize allocation and max matrices
+    int allocationArray[MAX_PROCESSES][MAX_RESOURCES] = {
+        {2, 3, 2},
+        {4, 0, 0},
+        {5, 0, 4},
+        {4, 3, 3},
+        {2, 2, 4}
+    };
+    int maxArray[MAX_PROCESSES][MAX_RESOURCES] = {
+        {9, 7, 5},
+        {5, 2, 2},
+        {3, 0, 4},
+        {4, 4, 4},
+        {6, 5, 5}
+    };
+
+    // Copy the arrays to global variables
+    for (int i = 0; i < MAX_PROCESSES; i++) {
+        for (int j = 0; j < MAX_RESOURCES; j++) {
+            allocation[i][j] = allocationArray[i][j];
+            max[i][j] = maxArray[i][j];
+            need[i][j] = max[i][j] - allocation[i][j];
+        }
+    }
+
+    int choice;
+    do {
+        printf("\nMenu:\n");
+        printf("1. Accept Available Resources\n");
+        printf("2. Display Allocation and Max\n");
+        printf("3. Display Need Matrix\n");
+        printf("4. Display Available Resources\n");
+        printf("5. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                acceptAvailable();
+                break;
+            case 2:
+                displayAllocationMax();
+                break;
+            case 3:
+                displayNeedMatrix();
+                break;
+            case 4:
+                displayAvailable();
+                break;
+            case 5:
+                printf("Exiting...\n");
+                break;
+            default:
+                printf("Invalid choice! Please enter a number between 1 and 5.\n");
+        }
+    } while (choice != 5);
+
+    return 0;
+}
+
+
+Q2]
+
+#include <stdio.h>
+#include <stdlib.h>
+
+// Function to calculate total head movements
+int calculateHeadMovements(int request[], int n, int start) {
+    int total_head_movements = 0;
+    int current_position = start;
+
+    // Iterate through the request list and calculate head movements
+    for (int i = 0; i < n; i++) {
+        total_head_movements += abs(request[i] - current_position);
+        current_position = request[i];
+    }
+
+    return total_head_movements;
+}
+
+int main() {
+    int total_blocks;
+    printf("Enter total number of disk blocks: ");
+    scanf("%d", &total_blocks);
+
+    int *request = (int *)malloc(total_blocks * sizeof(int));
+    if (request == NULL) {
+        printf("Memory allocation failed.\n");
+        return 1;
+    }
+
+    printf("Enter the disk request string (separated by spaces): ");
+    for (int i = 0; i < total_blocks; i++) {
+        scanf("%d", &request[i]);
+    }
+
+    int start_head_position;
+    printf("Enter the start head position: ");
+    scanf("%d", &start_head_position);
+
+    // Calculate total head movements using FCFS algorithm
+    int total_head_movements = calculateHeadMovements(request, total_blocks, start_head_position);
+
+    // Display the list of requests in the order they are served
+    printf("\nList of requests in the order they are served:\n");
+    for (int i = 0; i < total_blocks; i++) {
+        printf("%d ", request[i]);
+    }
+
+    // Display the total number of head movements
+    printf("\nTotal number of head movements: %d\n", total_head_movements);
+
+    free(request);
+    return 0;
+}
