@@ -1,0 +1,162 @@
+Q1]
+
+#include <stdio.h>
+#include <stdbool.h>
+
+#define NUM_PROCESSES 5
+#define NUM_RESOURCES 4
+
+int available[NUM_RESOURCES] = {1, 5, 2, 0};
+
+int max[NUM_PROCESSES][NUM_RESOURCES] = {
+    {0, 0, 1, 2},
+    {1, 7, 5, 0},
+    {2, 3, 5, 6},
+    {0, 6, 5, 2},
+    {0, 6, 5, 6}
+};
+
+int allocation[NUM_PROCESSES][NUM_RESOURCES] = {
+    {0, 0, 1, 2},
+    {1, 0, 0, 0},
+    {1, 3, 5, 4},
+    {0, 6, 3, 2},
+    {0, 0, 1, 4}
+};
+
+int need[NUM_PROCESSES][NUM_RESOURCES];
+
+bool finish[NUM_PROCESSES];
+
+// Function prototypes
+void calculateNeed();
+bool isSafeState(int safeSequence[]);
+
+int main() {
+    calculateNeed();
+
+    // Display the content of need matrix
+    printf("Need Matrix:\n");
+    for (int i = 0; i < NUM_PROCESSES; i++) {
+        printf("P%d: ", i);
+        for (int j = 0; j < NUM_RESOURCES; j++) {
+            printf("%d ", need[i][j]);
+        }
+        printf("\n");
+    }
+
+    // Check if the system is in a safe state and display the safe sequence if it is
+    int safeSequence[NUM_PROCESSES];
+    if (isSafeState(safeSequence)) {
+        printf("\nSystem is in safe state.\nSafe sequence:");
+        for (int i = 0; i < NUM_PROCESSES; i++) {
+            printf(" P%d", safeSequence[i]);
+        }
+        printf("\n");
+    } else {
+        printf("\nSystem is not in safe state.\n");
+    }
+
+    return 0;
+}
+
+// Calculate the need matrix
+void calculateNeed() {
+    for (int i = 0; i < NUM_PROCESSES; i++) {
+        for (int j = 0; j < NUM_RESOURCES; j++) {
+            need[i][j] = max[i][j] - allocation[i][j];
+        }
+    }
+}
+
+// Check if the system is in a safe state
+bool isSafeState(int safeSequence[]) {
+    int work[NUM_RESOURCES];
+    for (int i = 0; i < NUM_RESOURCES; i++) {
+        work[i] = available[i];
+    }
+
+    for (int i = 0; i < NUM_PROCESSES; i++) {
+        finish[i] = false;
+    }
+
+    int count = 0;
+    while (count < NUM_PROCESSES) {
+        bool found = false;
+        for (int i = 0; i < NUM_PROCESSES; i++) {
+            if (!finish[i]) {
+                bool canExecute = true;
+                for (int j = 0; j < NUM_RESOURCES; j++) {
+                    if (need[i][j] > work[j]) {
+                        canExecute = false;
+                        break;
+                    }
+                }
+                if (canExecute) {
+                    for (int j = 0; j < NUM_RESOURCES; j++) {
+                        work[j] += allocation[i][j];
+                    }
+                    safeSequence[count++] = i;
+                    finish[i] = true;
+                    found = true;
+                }
+            }
+        }
+        if (!found) {
+            return false; // No process found that can be executed
+        }
+    }
+    return true; // All processes executed successfully
+}
+
+
+Q2]
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <mpi.h>
+
+#define ARRAY_SIZE 1000
+
+int main(int argc, char *argv[]) {
+    int rank, size;
+    int array[ARRAY_SIZE];
+    int local_sum = 0, total_sum = 0;
+    double local_average, total_average;
+
+    MPI_Init(&argc, &argv);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+    // Initialize random number generator
+    srand(rank + 1);
+
+    // Generate random numbers for each process
+    for (int i = 0; i < ARRAY_SIZE; i++) {
+        array[i] = rand() % 100;
+    }
+
+    // Calculate local sum
+    for (int i = 0; i < ARRAY_SIZE; i++) {
+        local_sum += array[i];
+    }
+
+    // Reduce to get total sum
+    MPI_Reduce(&local_sum, &total_sum, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+
+    // Calculate local average
+    local_average = (double)local_sum / ARRAY_SIZE;
+
+    // Reduce to get total average
+    MPI_Reduce(&local_average, &total_average, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+
+    if (rank == 0) {
+        total_average /= size; // Calculate average of averages
+
+        printf("Total sum: %d\n", total_sum);
+        printf("Total average: %.2f\n", total_average);
+    }
+
+    MPI_Finalize();
+    return 0;
+}
