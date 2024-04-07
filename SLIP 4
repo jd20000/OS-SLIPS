@@ -1,0 +1,199 @@
+Q1]
+
+#include <stdio.h>
+
+#define NUM_PROCESSES 5
+#define NUM_RESOURCES 3
+
+int allocation[NUM_PROCESSES][NUM_RESOURCES] = {
+    {0, 1, 0},
+    {4, 0, 0},
+    {5, 0, 4},
+    {4, 3, 3},
+    {2, 2, 4}
+};
+
+int max[NUM_PROCESSES][NUM_RESOURCES] = {
+    {0, 0, 0},
+    {5, 2, 2},
+    {1, 0, 4},
+    {4, 4, 4},
+    {6, 5, 5}
+};
+
+int available[NUM_RESOURCES] = {7, 2, 6};
+
+void acceptAvailable() {
+    printf("Enter available resources of each type (A B C): ");
+    scanf("%d %d %d", &available[0], &available[1], &available[2]);
+}
+
+void displayAllocationMax() {
+    printf("\nProcess\tAllocation\tMax\n");
+    for (int i = 0; i < NUM_PROCESSES; i++) {
+        printf("P%d\t", i);
+        for (int j = 0; j < NUM_RESOURCES; j++) {
+            printf("%d ", allocation[i][j]);
+        }
+        printf("\t\t");
+        for (int j = 0; j < NUM_RESOURCES; j++) {
+            printf("%d ", max[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+void calculateNeed() {
+    printf("\nNeed Matrix:\n");
+    printf("Process\tNeed\n");
+    for (int i = 0; i < NUM_PROCESSES; i++) {
+        printf("P%d\t", i);
+        for (int j = 0; j < NUM_RESOURCES; j++) {
+            printf("%d ", max[i][j] - allocation[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+void displayAvailable() {
+    printf("\nAvailable Resources (A B C): ");
+    printf("%d %d %d\n", available[0], available[1], available[2]);
+}
+
+int main() {
+    char choice;
+    do {
+        printf("\nMenu:\n");
+        printf("a) Accept Available\n");
+        printf("b) Display Allocation, Max\n");
+        printf("c) Find Need and Display It\n");
+        printf("d) Display Available\n");
+        printf("e) Exit\n");
+        printf("Enter your choice: ");
+        scanf(" %c", &choice);
+
+        switch (choice) {
+            case 'a':
+                acceptAvailable();
+                break;
+            case 'b':
+                displayAllocationMax();
+                break;
+            case 'c':
+                calculateNeed();
+                break;
+            case 'd':
+                displayAvailable();
+                break;
+            case 'e':
+                printf("Exiting...\n");
+                break;
+            default:
+                printf("Invalid choice. Please try again.\n");
+        }
+    } while (choice != 'e');
+
+    return 0;
+}
+
+
+Q2]
+
+#include <stdio.h>
+#include <stdlib.h>
+
+// Function to sort the request array
+void sortRequests(int requests[], int n) {
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = 0; j < n - i - 1; j++) {
+            if (requests[j] > requests[j + 1]) {
+                // Swap
+                int temp = requests[j];
+                requests[j] = requests[j + 1];
+                requests[j + 1] = temp;
+            }
+        }
+    }
+}
+
+// Function to perform SCAN disk scheduling algorithm
+void scan(int requests[], int n, int head, int direction) {
+    int totalHeadMovements = 0;
+    int currentHead = head;
+    int firstIndex = 0, lastIndex = n - 1;
+    int index;
+
+    // Sort the request array
+    sortRequests(requests, n);
+
+    if (direction == -1) {
+        index = 0;
+        printf("Servicing requests: ");
+        while (index < n && requests[index] < currentHead) {
+            printf("%d ", requests[index]);
+            totalHeadMovements += abs(requests[index] - currentHead);
+            currentHead = requests[index];
+            index++;
+        }
+
+        if (index < n) {
+            printf("%d ", currentHead);
+            totalHeadMovements += abs(requests[index] - currentHead);
+            currentHead = requests[index];
+            index++;
+        }
+
+        for (int i = lastIndex; i >= index; i--) {
+            printf("%d ", requests[i]);
+            totalHeadMovements += abs(requests[i] - currentHead);
+            currentHead = requests[i];
+        }
+    } else {
+        index = n - 1;
+        printf("Servicing requests: ");
+        while (index >= 0 && requests[index] > currentHead) {
+            printf("%d ", requests[index]);
+            totalHeadMovements += abs(requests[index] - currentHead);
+            currentHead = requests[index];
+            index--;
+        }
+
+        if (index >= 0) {
+            printf("%d ", currentHead);
+            totalHeadMovements += abs(requests[index] - currentHead);
+            currentHead = requests[index];
+            index--;
+        }
+
+        for (int i = firstIndex; i <= index; i++) {
+            printf("%d ", requests[i]);
+            totalHeadMovements += abs(requests[i] - currentHead);
+            currentHead = requests[i];
+        }
+    }
+
+    printf("\nTotal Head Movements: %d\n", totalHeadMovements);
+}
+
+int main() {
+    int n, head, direction;
+
+    printf("Enter the number of disk requests: ");
+    scanf("%d", &n);
+    int requests[n];
+
+    printf("Enter the disk requests: ");
+    for (int i = 0; i < n; i++) {
+        scanf("%d", &requests[i]);
+    }
+
+    printf("Enter the starting head position: ");
+    scanf("%d", &head);
+
+    printf("Enter the direction (Left: -1, Right: 1): ");
+    scanf("%d", &direction);
+
+    scan(requests, n, head, direction);
+
+    return 0;
+}
