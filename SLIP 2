@@ -1,0 +1,175 @@
+Q1]
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+#define MAX_BLOCKS 100
+
+// Function prototypes
+void initializeDisk(int disk[], int n);
+void allocateBlocks(int disk[], int n);
+void showBitVector(int disk[], int n);
+void createNewFile(int disk[], int n);
+void showDirectory(int disk[], int n);
+
+int main() {
+    int disk[MAX_BLOCKS];
+    int n, choice;
+
+    printf("Enter the number of blocks on disk: ");
+    scanf("%d", &n);
+
+    initializeDisk(disk, n);
+    allocateBlocks(disk, n);
+
+    while (1) {
+        printf("\nMenu:\n");
+        printf("1. Show Bit Vector\n");
+        printf("2. Create New File\n");
+        printf("3. Show Directory\n");
+        printf("4. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                showBitVector(disk, n);
+                break;
+            case 2:
+                createNewFile(disk, n);
+                break;
+            case 3:
+                showDirectory(disk, n);
+                break;
+            case 4:
+                printf("Exiting...\n");
+                exit(0);
+            default:
+                printf("Invalid choice. Please enter again.\n");
+        }
+    }
+
+    return 0;
+}
+
+// Function to initialize disk with free blocks
+void initializeDisk(int disk[], int n) {
+    for (int i = 0; i < n; i++) {
+        disk[i] = 0;
+    }
+}
+
+// Function to randomly mark some blocks as allocated
+void allocateBlocks(int disk[], int n) {
+    srand(time(NULL));
+    int numAllocated = rand() % (n / 2) + 1; // Randomly allocate 1 to n/2 blocks
+    for (int i = 0; i < numAllocated; i++) {
+        int block = rand() % n;
+        disk[block] = 1;
+    }
+}
+
+// Function to display bit vector
+void showBitVector(int disk[], int n) {
+    printf("Bit Vector:\n");
+    for (int i = 0; i < n; i++) {
+        printf("Block %d: %s\n", i, disk[i] ? "Allocated" : "Free");
+    }
+}
+
+// Function to create a new file
+void createNewFile(int disk[], int n) {
+    char fileName[20];
+    int startBlock;
+
+    printf("Enter file name: ");
+    scanf("%s", fileName);
+
+    printf("Available blocks for allocation:\n");
+    for (int i = 0; i < n; i++) {
+        if (disk[i] == 0) {
+            printf("%d ", i);
+        }
+    }
+    printf("\nEnter starting block for file: ");
+    scanf("%d", &startBlock);
+
+    if (disk[startBlock] == 1) {
+        printf("Error: Starting block is already allocated.\n");
+        return;
+    }
+
+    disk[startBlock] = fileName[0]; // Storing first character of file name as a representation
+    int currentBlock = startBlock;
+    while (1) {
+        int nextBlock;
+        printf("Enter next block for file (or -1 to stop): ");
+        scanf("%d", &nextBlock);
+        if (nextBlock == -1)
+            break;
+        if (nextBlock >= n || nextBlock < 0) {
+            printf("Invalid block number.\n");
+            continue;
+        }
+        if (disk[nextBlock] == 1) {
+            printf("Error: Block is already allocated.\n");
+            continue;
+        }
+        disk[currentBlock] = nextBlock;
+        currentBlock = nextBlock;
+    }
+}
+
+// Function to display directory
+void showDirectory(int disk[], int n) {
+    printf("Directory:\n");
+    for (int i = 0; i < n; i++) {
+        if (disk[i] != 0 && disk[i] != 1) {
+            printf("File: %c, Start Block: %d\n", disk[i], i);
+        }
+    }
+}
+
+
+Q2]
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <mpi.h>
+
+#define ARRAY_SIZE 1000
+
+int main(int argc, char *argv[]) {
+    int rank, size;
+    int array[ARRAY_SIZE];
+    int sum = 0, total_sum = 0;
+
+    MPI_Init(&argc, &argv);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+    // Initialize random number generator
+    srand(rank + 1);
+
+    // Generate random numbers
+    for (int i = 0; i < ARRAY_SIZE; i++) {
+        array[i] = rand() % 100;
+    }
+
+    // Calculate sum of local portion
+    for (int i = 0; i < ARRAY_SIZE; i++) {
+        sum += array[i];
+    }
+
+    // Gather sums from all processes
+    MPI_Reduce(&sum, &total_sum, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+
+    // Print result on root process
+    if (rank == 0) {
+        printf("Total sum: %d\n", total_sum);
+    }
+
+    MPI_Finalize();
+    return 0;
+}
