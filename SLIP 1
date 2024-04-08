@@ -120,55 +120,28 @@ int main() {
 
 Q2]
 
-#include <stdio.h>
-#include <stdlib.h>
+#include<stdio.h>
+#include<stdlib.h>
 
-// Function to calculate total head movements
-int calculateHeadMovements(int request[], int n, int start) {
-    int total_head_movements = 0;
-    int current_position = start;
-
-    // Iterate through the request list and calculate head movements
-    for (int i = 0; i < n; i++) {
-        total_head_movements += abs(request[i] - current_position);
-        current_position = request[i];
-    }
-
-    return total_head_movements;
-}
-
-int main() {
-    int total_blocks;
-    printf("Enter total number of disk blocks: ");
-    scanf("%d", &total_blocks);
-
-    int *request = (int *)malloc(total_blocks * sizeof(int));
-    if (request == NULL) {
-        printf("Memory allocation failed.\n");
-        return 1;
-    }
-
-    printf("Enter the disk request string (separated by spaces): ");
-    for (int i = 0; i < total_blocks; i++) {
-        scanf("%d", &request[i]);
-    }
-
-    int start_head_position;
-    printf("Enter the start head position: ");
-    scanf("%d", &start_head_position);
-
-    // Calculate total head movements using FCFS algorithm
-    int total_head_movements = calculateHeadMovements(request, total_blocks, start_head_position);
-
-    // Display the list of requests in the order they are served
-    printf("\nList of requests in the order they are served:\n");
-    for (int i = 0; i < total_blocks; i++) {
-        printf("%d ", request[i]);
-    }
-
-    // Display the total number of head movements
-    printf("\nTotal number of head movements: %d\n", total_head_movements);
-
-    free(request);
+int main()
+{
+    int q[20],head,n,i,j,seek=0,max,diff;
+    printf("\nEnter Max Range of Disk: ");
+    scanf("%d",&max);
+    printf("\nEnter size of queue request: ");
+    scanf("%d",&n);
+    printf("\nEnter queue disk position to be read: ");
+    for (i=1;i<=n;i++)
+       scanf("%d",&q[i]);
+    printf("\nEnter Initial Head Position: ");
+    scanf("%d",&head);
+    q[0]=head;
+    for (j=0;j<n;j++)
+    {
+        diff = abs(q[j+1]-q[j]);
+        seek+=diff;
+        printf("Disk head moves from %d to %d with seek %d.\n",q[j],q[j+1],diff);
+    }   
+    printf("Total Head Movement is %d. \n",seek);
     return 0;
 }
