@@ -1,6 +1,7 @@
 Q1]
 
 #include <stdio.h>
+#include<stdlib.h>
 
 #define MAX_PROCESSES 5
 #define MAX_RESOURCES 3
@@ -20,13 +21,16 @@ void acceptAvailable() {
 
 void displayAllocationMax() {
     printf("Process Allocation Max\n");
-    for (int i = 0; i < MAX_PROCESSES; i++) {
+    for (int i = 0; i < MAX_PROCESSES; i++) 
+    {
         printf("P%d\t", i);
-        for (int j = 0; j < MAX_RESOURCES; j++) {
+        for (int j = 0; j < MAX_RESOURCES; j++)
+        {
             printf("%d ", allocation[i][j]);
         }
         printf("\t");
-        for (int j = 0; j < MAX_RESOURCES; j++) {
+        for (int j = 0; j < MAX_RESOURCES; j++) 
+        {
             printf("%d ", max[i][j]);
         }
         printf("\n");
@@ -64,7 +68,7 @@ int main() {
     int maxArray[MAX_PROCESSES][MAX_RESOURCES] = {
         {9, 7, 5},
         {5, 2, 2},
-        {3, 0, 4},
+        {1, 0, 4},
         {4, 4, 4},
         {6, 5, 5}
     };
@@ -74,7 +78,7 @@ int main() {
         for (int j = 0; j < MAX_RESOURCES; j++) {
             allocation[i][j] = allocationArray[i][j];
             max[i][j] = maxArray[i][j];
-            need[i][j] = max[i][j] - allocation[i][j];
+            need[i][j] = abs(max[i][j] - allocation[i][j]);
         }
     }
 
